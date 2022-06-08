@@ -9,5 +9,11 @@ router.get('/user-profile', getUserProfile);
 
 router.put('/edit-profile', editUserProfile);
 
+router.put('/edit-post'); // falta vamo con este
+
+router.delete('/delete-friend'); // falta
+
+router.delete('/delete-post'); // falta
+
 
 module.exports = router;
