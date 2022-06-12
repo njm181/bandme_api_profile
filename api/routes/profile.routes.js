@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { getUserProfile, editUserProfile } = require('../controllers/profile.controller');
+const { getUserProfile, editUserProfile, editUserPost, deleteUserFriend, deleteUserPost } = require('../controllers/profile.controller');
 
 const router = Router();
 
@@ -9,11 +9,11 @@ router.get('/user-profile', getUserProfile);
 
 router.put('/edit-profile', editUserProfile);
 
-router.put('/edit-post'); // falta vamo con este
+router.put('/edit-post', editUserPost);
 
-router.delete('/delete-friend'); // falta
+router.delete('/delete-friend', deleteUserFriend);
 
-router.delete('/delete-post'); // falta
+router.delete('/delete-post', deleteUserPost);
 
 
 module.exports = router;
