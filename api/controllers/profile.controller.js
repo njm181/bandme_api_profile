@@ -148,10 +148,42 @@ const deleteUserPost = async(req, res = response) => {
         });
     } 
 }
+
+
+const postFollowUser = async(req, res = response) => {
+    const token = req.headers['auth-token'];
+    const { payload } = req.body;
+
+    if(token == '1234567'){ //if the token comes in the request
+        const profileService = new ProfileService();
+        const userFollowed = await profileService.postFollowUser(token, payload);
+        let response;
+        if(userFollowed.was_new_friend_added){
+            response = res.status(200).json({
+                was_new_friend_added: userFollowed.was_new_friend_added,
+                user_data: userFollowed.user_data,
+                message: 'Following new user successfully'
+            });
+        }else{
+            response = res.status(200).json({
+                was_new_friend_added:userFollowed.was_new_friend_added,
+                user_data: userFollowed.user_data,
+                message: 'Could not follow new user'
+            });
+        }
+
+    }else{
+        return res.status(400).json({
+            message: 'Error request by bad token'
+        });
+    } 
+}
+
 module.exports = {
     getUserProfile,
     editUserProfile,
     editUserPost,
     deleteUserFriend,
     deleteUserPost,
+    postFollowUser,
 }
