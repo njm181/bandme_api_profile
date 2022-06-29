@@ -9,7 +9,6 @@ const getUserProfileController = async(req, res = response) => {
     console.log('token recibido desde el body controller: '+token);
     if(token != undefined) { //if the token comes in the request
         const profileService = new ProfileService();
-        //const userProfileData = 
         const {uid} = await profileService.decodeToken(token);
         console.log('RESULTADO DESDE CONTROLLER: ' + JSON.stringify(uid));
         const userProfile = await profileService.getUserProfilByUid(uid);
@@ -39,9 +38,10 @@ const editUserProfile = async(req, res = response) => {
     const token = req.headers['auth-token'];
     const { payload } = req.body;
 
-    if(token == '1234567'){ //if the token comes in the request
+    if(token != undefined){
         const profileService = new ProfileService();
-        const userProfileEdited = await profileService.editUserProfile(token, payload);
+        const {uid} = await profileService.decodeToken(token);
+        const userProfileEdited = await profileService.editUserProfile(uid, payload);
         let response;
         if(userProfileEdited.was_edited){
             response = res.status(200).json({
@@ -51,7 +51,7 @@ const editUserProfile = async(req, res = response) => {
             });
         }else{
             response = res.status(200).json({
-                was_edited,
+                was_edited: userProfileEdited.was_edited,
                 user_data_edited: userProfileEdited.user_new_data,
                 message: 'User was not edited'
             });

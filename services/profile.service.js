@@ -29,12 +29,18 @@ class ProfileService {
         try{
             const userProfileDb = await User.findById(userUid);
             console.log('datos obtenidos de la db del usuario: '+userProfileDb);
-            const { email, userType } = userProfileDb;
+            const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status } = userProfileDb;
             userProfile = {
                 exist: true,
                 user_data: {
-                    email: email,
-                    userType: userType
+                    email,
+                    user_type,
+                    description,
+                    profile_photo,
+                    social_media,
+                    first_name,
+                    last_name,
+                    account_status
                 }
             };
         }catch(error){
@@ -61,38 +67,42 @@ class ProfileService {
         return userProfile;
     };
 
-    async editUserProfile(token, payload){
-        
-        //1.obtengo el token y mando a desencriptarlo para obtener el id del usuario en mongo
-        //2.con ese id de usuario de mongo obtengo los datos del usuario
-        //3.en userNewData se espera una lista con redes sociales, una description y una imagen, puede venir con algo o no
-        //4.armo un nuevo objeto entre la data vieja y la nueva y mando a guardar
-        //5.la respuesta es un boolean y un message
+    async editUserProfile(userUid, payload){
+        //1.con ese id de usuario de mongo obtengo los datos del usuario
+        //2.en userNewData se espera una lista con redes sociales, una description y una imagen, puede venir con algo o no
+        //3.armo un nuevo objeto entre la data vieja y la nueva y mando a guardar
+        //4.la respuesta es un boolean y un message
         //====
-        //6.En la app configurar despues de un success hacer un auto refresh para mostrar la nueva data
-        /* let dataToEditMocked = {
-            description: 'Esto es una descripcion de un usuario editada',
-            image: '',
-            social_media: [{name: 'instagram', url: 'instagramEditado.com'}, {name: 'youtube', url: ''}, {name: 'spotify', url: 'spotifyEditado.com'}],
-        } */
-
-        let dataFromMongoMocked = {
-            description: 'Esto es una descripcion de un usuario',
-            image: 'urlimageVieja.com',
-            social_media: [{name: 'instagram', url: ''}, {name: 'youtube', url: ''}, {name: 'spotify', url: ''}],
-        }
-
-        let userProfileEdited;
-
-        if(token === '1234567'){
-            let getElementEdited = payload.social_media.filter(function(element){
+        //5.En la app configurar despues de un success hacer un auto refresh para mostrar la nueva data
+        let userProfileEdited = {
+            was_edited: false,
+            user_new_data: {}
+        };
+        try{
+            const userProfileDb = await User.findById(userUid);
+            console.log('datos obtenidos de la db del usuario: '+userProfileDb);
+            const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status } = userProfileDb;
+            const userProfileByMongo = {
+                    email,
+                    user_type,
+                    description,
+                    profile_photo,
+                    social_media,
+                    first_name,
+                    last_name,
+                    account_status
+            };
+            let getElementEdited = [];
+            getElementEdited = payload.social_media.filter(function(element){
                 if(element.url != ''){
                     return element;
                 }
             });
-            dataFromMongoMocked.social_media.forEach((element, index) => {
+            userProfileByMongo.social_media.forEach((element, index) => {
+                console.log("Elemento del for each: " + element)
                 let elementEdited = getElementEdited.find(obj => {
                     if (obj.name == element.name) {
+                        console.log("Elemento del find: " + JSON.stringify(obj));
                         return obj;
                     }
                 });
@@ -105,12 +115,22 @@ class ProfileService {
             userProfileEdited = {
                 was_edited: true,
                 user_new_data: {
-                    description: (payload.description == '') ? dataFromMongoMocked.description : payload.description,
-                    image: (payload.image == '') ? dataFromMongoMocked.image : payload.image,
-                    social_media: dataFromMongoMocked.social_media
+                    description: (payload.description == '') ? userProfileByMongo.description : payload.description,
+                    image: (payload.image == '') ? userProfileByMongo.profile_photo : payload.image,
+                    social_media: userProfileByMongo.social_media
                 }
             }
-        }else{
+
+            const update = userProfileDb.updateOne({description: description, profile_photo: profile_photo, social_media: social_media}, function(error, result) {
+                if(error){
+                    console.log("Error al actualizar perfil del usuario en DB: " + error);
+                }else{
+                    console.log("Perfil actualizado en DB: " + JSON.stringify(result));
+                }
+            });
+
+        }catch(error){
+            console.log("Error CATCH: " + error)
             userProfileEdited = {
                 was_edited: false,
                 user_new_data: {}

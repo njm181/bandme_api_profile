@@ -10,24 +10,30 @@ const UserSchema = Schema({
     password: {
         type: String
     },
-    userType: {
+    user_type: {
         type: String
     },
     provider: {
         type: String
     },
-    profilePhoto: {
+    profile_photo: {
         type: String,
     },
-    firstName: {
+    first_name: {
         type: String
     },
-    lastName: {
+    last_name: {
         type: String
     },
-    accountStatus: {
+    description: {
+        type: String
+    },
+    social_media: {
+        type: Array
+    },
+    account_status: {
         type: String,
-        default: 'diseable'
+        default: 'enable'
     }
 });
 
