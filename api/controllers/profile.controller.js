@@ -64,13 +64,44 @@ const editUserProfile = async(req, res = response) => {
     } 
 }
 
+const createUserPost = async(req, res = response) => {
+    const token = req.headers['auth-token'];
+    const { payload } = req.body;
+    console.log('token para crear post: ' + token);
+    if(token != undefined){ //if the token comes in the request
+        const profileService = new ProfileService();
+        const {uid} = await profileService.decodeToken(token);
+        const userPostCreated = await profileService.createUserPostService(uid, payload);
+        let response;
+        if(userPostCreated.was_created){
+            response = res.status(200).json({
+                was_created: userPostCreated.was_created,
+                user_post_created: userPostCreated.user_post_created,
+                message: 'Post was edited successfully'
+            });
+        }else{
+            response = res.status(200).json({
+                was_created:userPostCreated.was_created,
+                user_post_created: userPostCreated.user_post_created,
+                message: 'Post was not edited'
+            });
+        }
+
+    }else{
+        return res.status(400).json({
+            message: 'Error request by bad token'
+        });
+    } 
+}
+
 const editUserPost = async(req, res = response) => {
     const token = req.headers['auth-token'];
     const { payload } = req.body;
 
-    if(token == '1234567'){ //if the token comes in the request
+    if(token != undefined){ //if the token comes in the request
         const profileService = new ProfileService();
-        const userPostEdited = await profileService.editUserPost(token, payload);
+        const {uid} = await profileService.decodeToken(token);
+        const userPostEdited = await profileService.editUserPost(uid, payload);
         let response;
         if(userPostEdited.was_edited){
             response = res.status(200).json({
@@ -188,4 +219,5 @@ module.exports = {
     deleteUserFriend,
     deleteUserPost,
     postFollowUser,
+    createUserPost
 }

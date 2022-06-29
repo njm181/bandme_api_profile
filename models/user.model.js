@@ -31,6 +31,9 @@ const UserSchema = Schema({
     social_media: {
         type: Array
     },
+    post_list: {
+        type: Array
+    },
     account_status: {
         type: String,
         default: 'enable'

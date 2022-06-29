@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 const User = require('../models/user.model');
 const mongoose = require('mongoose');
+const Post = require('../models/post.model');
 
 class ProfileService {
 
@@ -139,15 +140,71 @@ class ProfileService {
         return userProfileEdited;
     }
 
-    async editUserPost(token, payload){
-        //1.obtengo el token y mando a desencriptarlo para obtener el id del usuario en mongo
-        //2.con ese id de usuario de mongo obtengo los datos del usuario
-        //3.Dentro de esos datos tiene que existir una lista de posteos historicos que el usuario creo
-        //4.Del Payload puedo obtener el id de posteo que se quiere editar,
-        //5.Entonces recorro la lista de posteos historicos y comparo los ID con el ID que viene en Payload
-        //6.Una vez que encuentre el posteo que se quiere editar obtengo sus datos
-        //7.Datos del posteo: Title, street, street number, postal code, description, date, time, checkbox
-        //8.Comparo los campos contra los valores que trae Payload y aquellos que son distintos son pisados por los que trae Payload
+    async createUserPostService(userUid, payload){
+        //1.Creo un objeto nuevo con el uid del usuario y la data del posteo todos campos del mismo objeto, sin encapsular
+        //chequear nullable, undefined
+        const newPost = new Post({
+            id_owner: userUid,
+            title: payload.title,
+            street: payload.street,
+            street_number: payload.street_number,
+            postal_code: payload.postal_code,
+            description: payload.description,
+            date: payload.date,
+            time: payload.time,
+            checkbox: payload.checkbox,
+        });
+
+        console.log("datos para guardar: " + JSON.stringify(newPost));
+        try{
+            //2.mando guardar y crear documento en mongo
+            //3.obtengo id del documento creado de mongo
+            const result = await newPost.save();
+            console.log("respuesta de guardar posteo en la base de datos: " + JSON.stringify(result._id));
+            //4.voy a buscar mediante el uid los datos del usuario y le inyecto el id del posteo a sus array de ids de posteos
+            const userProfileDb = await User.findById(userUid);
+            console.log('datos obtenidos de la db del usuario: '+userProfileDb);
+            userProfileDb.post_list.push(result._id);
+            const update = userProfileDb.updateOne({post_list: userProfileDb.post_list }, function(error, result) {
+                if(error){
+                    console.log("Error al actualizar perfil del usuario en DB: " + error);
+                }else{
+                    console.log("Perfil actualizado en DB con nuevo posteo: " + JSON.stringify(result));
+                }
+            });
+        }catch(error){
+            console.log("Error no se pudo guardar posteo en la base de datos: " + error);
+        }
+        
+        let response = {
+            was_created: true,
+            user_post_created: {}
+        }
+        return response;
+
+    }
+
+    async editUserPost(userUid, payload){
+        //1.con ese id de usuario de mongo obtengo los datos del usuario
+        //2.Dentro de esos datos tiene que existir una lista de posteos historicos que el usuario creo
+        const userProfileDb = await User.findById(userUid);
+            console.log('datos obtenidos de la db del usuario: '+userProfileDb);
+            const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status } = userProfileDb;
+            const userProfileByMongo = {
+                    email,
+                    user_type,
+                    description,
+                    profile_photo,
+                    social_media,
+                    first_name,
+                    last_name,
+                    account_status
+            };
+        //3.Del Payload puedo obtener el id de posteo que se quiere editar,
+        //4.Entonces recorro la lista de posteos historicos y comparo los ID con el ID que viene en Payload
+        //5.Una vez que encuentre el posteo que se quiere editar obtengo sus datos
+        //6.Datos del posteo: Title, street, street number, postal code, description, date, time, checkbox
+        //7.Comparo los campos contra los valores que trae Payload y aquellos que son distintos son pisados por los que trae Payload
         console.log('Payload que llega al service para editar un posteo: ' + JSON.stringify(payload));
         //mock user data
         const userDataFromMongo = {
