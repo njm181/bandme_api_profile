@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require('cors');
 const helmet = require("helmet");
+const {connectDB} = require('./db');
 require('dotenv').config();
 
 const rootPath = '/api/v1/profile';
@@ -13,6 +14,7 @@ class Server {
         this.path = rootPath;
         this.initMiddlewares();
         this.routes();
+        connectDB();
     }
 
     initMiddlewares(){

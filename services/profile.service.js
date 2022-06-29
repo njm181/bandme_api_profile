@@ -1,31 +1,63 @@
+const axios = require('axios').default;
+const User = require('../models/user.model');
+const mongoose = require('mongoose');
+
 class ProfileService {
 
     constructor(){}
 
-    async getUserProfile(token){
-        //1.obtengo el token y mando a desencriptarlo para obtener el id del usuario en mongo
-        //2.con ese id de usuario de mongo obtengo los datos del usuario
-        //3.devolver objeto con los datos del usuario
-        let userProfile;
-        if(token === '1234567'){ //simulacion de verificacion del token//middleware que valide el token
+    async decodeToken(userToken){
+        try{
+            const {data:response} = await axios.post('http://localhost:5001/api/v1/login/validate/user-identity', {
+            token:userToken
+        });
+            return response;
+        }catch(error){
+            console.log("Error catch: " + error);
+        }
+    }
+
+    async getUserProfilByUid(userUid){
+        //1.con ese id de usuario de mongo obtengo los datos del usuario
+        //2.devolver objeto con los datos del usuario
+        let userProfile = {
+            exist: false,
+            user_data: {
+                email: ''
+            }
+        }
+        try{
+            const userProfileDb = await User.findById(userUid);
+            console.log('datos obtenidos de la db del usuario: '+userProfileDb);
+            const { email, userType } = userProfileDb;
             userProfile = {
                 exist: true,
                 user_data: {
-                    name: 'Pipo',
-                    surname: 'Gorosito',
-                    social_media: [{name: 'instagram', url: 'instagram.com'}, {name: 'youtube', url: 'youtube.com'}, {name: 'spotify', url: 'spotify.com'}],
-                    description: 'Esto es una description de Pipo Gorosito',
-                    post_list: [{id: "1", title: 'Datos del posteo numero 1'}, {id: "2", title: 'Datos del posteo numero 2'}, {id: "3", title: 'Datos del posteo numero 3'}, {id: "4", title: 'Datos del posteo numero 4'}],
-                    friends_list: [{id: "1", name: 'Amigo Numero 1'}, {id: "2", name: 'Amigo Numero 2'}, {id: "3", name: 'Amigo Numero 3'}, {id: "4", name: 'Amigo Numero 4'}],
-                    image: 'urlimage.com'
+                    email: email,
+                    userType: userType
                 }
-            }
-        } else {
+            };
+        }catch(error){
+            console.log("Error al obtener usuario de la base de datos: " + error)
             userProfile = {
                 exist: false,
-                user_data: {}
+                user_data: {
+                    email: 'catch: not found'
+                }
             }
         }
+        /*  userProfile = {
+            exist: true,
+            user_data: {
+                name: 'Pipo',
+                surname: 'Gorosito',
+                social_media: [{name: 'instagram', url: 'instagram.com'}, {name: 'youtube', url: 'youtube.com'}, {name: 'spotify', url: 'spotify.com'}],
+                description: 'Esto es una description de Pipo Gorosito',
+                post_list: [{id: "1", title: 'Datos del posteo numero 1'}, {id: "2", title: 'Datos del posteo numero 2'}, {id: "3", title: 'Datos del posteo numero 3'}, {id: "4", title: 'Datos del posteo numero 4'}],
+                friends_list: [{id: "1", name: 'Amigo Numero 1'}, {id: "2", name: 'Amigo Numero 2'}, {id: "3", name: 'Amigo Numero 3'}, {id: "4", name: 'Amigo Numero 4'}],
+                image: 'urlimage.com'
+            }
+        } */
         return userProfile;
     };
 
