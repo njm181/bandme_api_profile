@@ -157,9 +157,10 @@ const deleteUserPost = async(req, res = response) => {
     const token = req.headers['auth-token'];
     const { payload } = req.body;
 
-    if(token == '1234567'){ //if the token comes in the request
+    if(token != undefined){ //if the token comes in the request
         const profileService = new ProfileService();
-        const userEdited = await profileService.deleteUserPost(token, payload);
+        const {uid} = await profileService.decodeToken(token);
+        const userEdited = await profileService.deleteUserPost(uid, payload);
         let response;
         if(userEdited.was_deleted_post){
             response = res.status(200).json({

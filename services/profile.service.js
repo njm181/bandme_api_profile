@@ -122,7 +122,7 @@ class ProfileService {
                 }
             }
 
-            const update = userProfileDb.updateOne({description: description, profile_photo: profile_photo, social_media: social_media}, function(error, result) {
+            userProfileDb.updateOne({description: description, profile_photo: profile_photo, social_media: social_media}, function(error, result) {
                 if(error){
                     console.log("Error al actualizar perfil del usuario en DB: " + error);
                 }else{
@@ -227,6 +227,23 @@ class ProfileService {
                     checkbox: (userPostDb.checkbox == payload.checkbox || payload.checkbox == '') ? userPostDb.checkbox : payload.checkbox,
                 }
                 console.log('resultado del post editado: ' + JSON.stringify(postEdited));
+                
+                userPostDb.updateOne({
+                    title: postEdited.title,
+                    street: postEdited.street,
+                    street_number: postEdited.street_number,
+                    postal_code: postEdited.postal_code,
+                    description: postEdited.description,
+                    date: postEdited.date,
+                    time: postEdited.time,
+                    checkbox: postEdited.checkbox }, function(error, result) {
+                    if(error){
+                        console.log("Error al actualizar posteo del usuario en DB: " + error);
+                    }else{
+                        console.log("Posteo actualizado en DB: " + JSON.stringify(result));
+                    }
+                });
+
                 userPostEdited = {
                     was_edited: true,
                     user_post_edited: {
@@ -290,37 +307,33 @@ class ProfileService {
         return userDataEdited;
     }
 
-    async deleteUserPost(token, payload){
-        //1.obtengo el token y mando a desencriptarlo para obtener el id del usuario en mongo
+    async deleteUserPost(userUid, payload){
         //2.con ese id de usuario de mongo obtengo los datos del usuario
-        //3.Dentro del payload esta esta el Id del post del usuario que quiero eliminar de la lista de posts
-        //4.Dentro de los datos que obtuve del usuario busco en la lista de posts un elemento
-        //que coincida su element.id con el id del payload y lo quito de la lista
-        //5.devuelvo los datos del usuario con la nueva lista
-     
-        //Mock of user data from mongo
-        const userDataFromMongo = {
-            name: 'Pipo',
-            surname: 'Gorosito',
-            social_media: [{name: 'instagram', url: 'instagram.com'}, {name: 'youtube', url: 'youtube.com'}, {name: 'spotify', url: 'spotify.com'}],
-            description: 'Esto es una description de Pipo Gorosito',
-            post_list: [{id: "1", title: 'Datos del posteo numero 1'}, {id: "2", title: 'Datos del posteo numero 2'}, {id: "3", title: 'Datos del posteo numero 3'}, {id: "4", title: 'Datos del posteo numero 4'}],
-            friends_list: [{id: "1", name: 'Amigo Numero 1'}, {id: "2", name: 'Amigo Numero 2'}, {id: "3", name: 'Amigo Numero 3'}, {id: "4", name: 'Amigo Numero 4'}],
-            image: 'urlimage.com'
-        }
-
-        let userDataEdited;
-
-        if(payload.id != undefined || payload.id != null){
-            console.log('lista antes de eliminar un elemento: ' + JSON.stringify(userDataFromMongo.post_list));
-            const newPostList = userDataFromMongo.post_list.filter(item => item.id != payload.id);
-            console.log('lista despues de eliminar un elemento: ' + JSON.stringify(newPostList));
-            userDataFromMongo.post_list = newPostList;
+        let userDataEdited = {
+            was_deleted_post: false,
+            user_data_edited: {}
+        };
+        try{
+            console.log("uid para buscar usuario: "+ userUid);
+            const userProfileDb = await User.findById(userUid);
+            console.log('datos obtenidos de la db del usuario: '+userProfileDb);
+            //3.Dentro del payload esta esta el Id del post del usuario que quiero eliminar de la lista de posts
+            //4.Dentro de los datos que obtuve del usuario busco en la lista de posts un elemento
+            //let isValidPost = false;
+            console.log('lista de posteos previo al filter: '+userProfileDb.post_list);
+            const list_edited = userProfileDb.post_list.filter(element => 
+                element != payload.id
+            );
+            userProfileDb.post_list = list_edited;
+            const result = await userProfileDb.save();//updateOne({post_list: userProfileDb.post_list});
+            console.log("RESULT: " + result);    
+            //que coincida su element.id con el id del payload y lo quito de la lista y actualizo el documento en mongo
             userDataEdited = {
                 was_deleted_post: true,
-                user_data_edited: {userDataFromMongo}
+                user_data_edited: {result}
             }
-        }else {
+        }catch(error){
+            console.log("Error al obtener los datos del usuario: " + error);
             userDataEdited = {
                 was_deleted_post: false,
                 user_data_edited: {}
