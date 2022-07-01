@@ -268,41 +268,40 @@ class ProfileService {
         return userPostEdited;
     }
 
-    async deleteUserFriend(token, payload){
-        //1.obtengo el token y mando a desencriptarlo para obtener el id del usuario en mongo
-        //2.con ese id de usuario de mongo obtengo los datos del usuario
-        //3.Dentro del payload esta esta el Id del usuario que quiero eliminar de la lista de friends
-        //4.Dentro de los datos que obtuve del usuario busco en la lista de friends un elemento
-        //que coincida su element.id con el id del payload y lo quito de la lista
-        //5.devuelvo los datos del usuario con la nueva lista
-     
-        //Mock of user data from mongo
-        const userDataFromMongo = {
-            name: 'Pipo',
-            surname: 'Gorosito',
-            social_media: [{name: 'instagram', url: 'instagram.com'}, {name: 'youtube', url: 'youtube.com'}, {name: 'spotify', url: 'spotify.com'}],
-            description: 'Esto es una description de Pipo Gorosito',
-            post_list: [{id: "1", title: 'Datos del posteo numero 1'}, {id: "2", title: 'Datos del posteo numero 2'}, {id: "3", title: 'Datos del posteo numero 3'}, {id: "4", title: 'Datos del posteo numero 4'}],
-            friends_list: [{id: "1", name: 'Amigo Numero 1'}, {id: "2", name: 'Amigo Numero 2'}, {id: "3", name: 'Amigo Numero 3'}, {id: "4", name: 'Amigo Numero 4'}],
-            image: 'urlimage.com'
-        }
-
-        let userDataEdited;
-
-        if(payload.id != undefined || payload.id != null){
-            console.log('lista antes de eliminar un elemento: ' + JSON.stringify(userDataFromMongo.friends_list));
-            const newFriendsList = userDataFromMongo.friends_list.filter(item => item.id != payload.id);
-            console.log('lista despues de eliminar un elemento: ' + JSON.stringify(newFriendsList));
-            userDataFromMongo.friends_list = newFriendsList;
+    async deleteUserFriend(userUid, payload){
+        let userDataEdited = {
+            was_deleted_friend: false,
+            user_data_edited: {}
+        };
+        try{
+            //2.con ese id de usuario de mongo obtengo los datos del usuario
+            console.log("uid para buscar usuario: "+ userUid);
+            const userProfileDb = await User.findById(userUid);
+            console.log('datos obtenidos de la db del usuario: '+userProfileDb);
+            //3.Dentro del payload esta esta el Id del usuario que quiero eliminar de la lista de friends
+            //4.Dentro de los datos que obtuve del usuario busco en la lista de friends un elemento
+            //que coincida su element.id con el id del payload y lo quito de la lista
+            //console.log('lista de amigos previo al filter: '+JSON.stringify(userProfileDb.friend_list));
+            const list_edited = userProfileDb.friend_list.filter(element => 
+                element._id != payload.id
+            );
+            //console.log("lista editada: " + JSON.stringify(list_edited));
+            userProfileDb.friend_list = list_edited;
+            //console.log("lista de amigos despues del filter: " + JSON.stringify(userProfileDb.friend_list));
+            const result = await userProfileDb.save();//updateOne({post_list: userProfileDb.post_list});
+            console.log("RESULT: " + result);    
+            //que coincida su element.id con el id del payload y lo quito de la lista y actualizo el documento en mongo
             userDataEdited = {
                 was_deleted_friend: true,
-                user_data_edited: {userDataFromMongo}
+                user_data_edited: {result}
             }
-        }else {
+            //5.devuelvo los datos del usuario con la nueva lista
+        }catch(error){
+            console.log("Error al obtener datos del usuario: " + error);
             userDataEdited = {
                 was_deleted_friend: false,
                 user_data_edited: {}
-            }
+            };
         }
         return userDataEdited;
     }
