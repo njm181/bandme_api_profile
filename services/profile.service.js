@@ -342,42 +342,42 @@ class ProfileService {
         return userDataEdited;
     }
 
-    async postFollowUser(token, payload){
-        //1.obtengo el token y mando a desencriptarlo para obtener el id del usuario en mongo
-        //2.con ese id de usuario de mongo obtengo los datos del usuario
-        //3.El Payload trae el id del usuario que quiero agregar a mi lista de amigos
-        //4.Con ese ID del payload traigo los datos del usuario que quiero seguir
-        //5.Agrego un nuevo objeto a mi lista de amigos con esos datos del usuario que obtuve
-
-        //con el token traigo mis datos
-        //Mock of user data from mongo
-        const userDataFromMongo = {
-            name: 'Pipo',
-            surname: 'Gorosito',
-            social_media: [{name: 'instagram', url: 'instagram.com'}, {name: 'youtube', url: 'youtube.com'}, {name: 'spotify', url: 'spotify.com'}],
-            description: 'Esto es una description de Pipo Gorosito',
-            post_list: [{id: "1", title: 'Datos del posteo numero 1'}, {id: "2", title: 'Datos del posteo numero 2'}, {id: "3", title: 'Datos del posteo numero 3'}, {id: "4", title: 'Datos del posteo numero 4'}],
-            friends_list: [{id: "1", name: 'Amigo Numero 1'}, {id: "2", name: 'Amigo Numero 2'}, {id: "3", name: 'Amigo Numero 3'}, {id: "4", name: 'Amigo Numero 4'}],
-            image: 'urlimage.com'
-        }
-
-        let userFollowed;
-        console.log('payload: ' + JSON.stringify(payload.id))
-        //const id = payload.id;
-        if(payload.id != undefined && payload.id != null && payload.id != ""){
-            //voy a buscar a mongo ese id y si existe traigo los datos: id que ya lo tenia, nombre, foto, 
-            //mock user to follow
-            let userMocked = {
-                id: payload.id,
-                name: "Fulano Sultano",
-                image: "https://url.com"
-            }
-            userDataFromMongo.friends_list.push(userMocked);
+    async postFollowUser(userUid, payload){
+        //este id que trae el payload lo obtengo en la app entrando desde el dashboard donde veo los eventos ingreso al perfil del usuario que genero ese evento
+        let userFollowed = {
+            was_new_friend_added: false,
+            user_data: {}
+        };
+        try{
+            //2.con ese id de usuario de mongo obtengo los datos del usuario
+            const userProfileDb = await User.findById(userUid);
+            console.log('datos obtenidos de la db del usuario: '+userProfileDb);    
+            //3.El Payload trae el id del usuario que quiero agregar a mi lista de amigos
+            //4.Con ese ID del payload traigo los datos del usuario que quiero seguir
+            const friendProfileDb = await User.findById(payload.id);
+            console.log('datos obtenidos del amigo para agregar de la db: '+friendProfileDb);
+            //5.Agrego un nuevo objeto a mi lista de amigos con esos datos del usuario que obtuve, pero solo id, nombre, apellido, y foto por el momento
+            //const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status, post_list } = userProfileDb;
+            //const { friend_list } = userProfileDb;
+            const { _id, first_name, last_name, profile_photo } = friendProfileDb;
+            const friend = {
+                _id,
+                first_name,
+                last_name,
+                profile_photo
+            };
+            console.log("datos del amigo: " + JSON.stringify(friend));
+            console.log("friend list antes de agregar nuevo amigo: " + JSON.stringify(userProfileDb.friend_list));
+            //userProfileDb.friend_list = friend_list;
+            userProfileDb.friend_list.push(friend);
+            console.log("friend list despues de agregar nuevo amigo: " + JSON.stringify(userProfileDb.friend_list));
+            const result = await userProfileDb.save();
             userFollowed = {
                 was_new_friend_added: true,
-                user_data: {userDataFromMongo}
+                user_data: {result}
             }
-        }else{
+        }catch(error){
+            console.log("Error al obtener datos del usuario: " + error);
             userFollowed = {
                 was_new_friend_added: false,
                 user_data: {}

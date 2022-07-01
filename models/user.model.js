@@ -37,6 +37,13 @@ const UserSchema = Schema({
     post_list: {
         type: Array
     },
+    friend_list: {
+        type: Array
+        /* _id: mongoose.SchemaTypes.ObjectId,
+        first_name: String,
+        last_name: String,
+        profile_photo: String */
+    },
     account_status: {
         type: String,
         default: 'enable'

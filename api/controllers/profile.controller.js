@@ -188,9 +188,10 @@ const postFollowUser = async(req, res = response) => {
     const token = req.headers['auth-token'];
     const { payload } = req.body;
 
-    if(token == '1234567'){ //if the token comes in the request
+    if(token != undefined){ //if the token comes in the request
         const profileService = new ProfileService();
-        const userFollowed = await profileService.postFollowUser(token, payload);
+        const {uid} = await profileService.decodeToken(token);
+        const userFollowed = await profileService.postFollowUser(uid, payload);
         let response;
         if(userFollowed.was_new_friend_added){
             response = res.status(200).json({
