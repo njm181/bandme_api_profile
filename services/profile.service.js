@@ -53,18 +53,6 @@ class ProfileService {
                 }
             }
         }
-        /*  userProfile = {
-            exist: true,
-            user_data: {
-                name: 'Pipo',
-                surname: 'Gorosito',
-                social_media: [{name: 'instagram', url: 'instagram.com'}, {name: 'youtube', url: 'youtube.com'}, {name: 'spotify', url: 'spotify.com'}],
-                description: 'Esto es una description de Pipo Gorosito',
-                post_list: [{id: "1", title: 'Datos del posteo numero 1'}, {id: "2", title: 'Datos del posteo numero 2'}, {id: "3", title: 'Datos del posteo numero 3'}, {id: "4", title: 'Datos del posteo numero 4'}],
-                friends_list: [{id: "1", name: 'Amigo Numero 1'}, {id: "2", name: 'Amigo Numero 2'}, {id: "3", name: 'Amigo Numero 3'}, {id: "4", name: 'Amigo Numero 4'}],
-                image: 'urlimage.com'
-            }
-        } */
         return userProfile;
     };
 
@@ -142,7 +130,6 @@ class ProfileService {
 
     async createUserPostService(userUid, payload){
         //1.Creo un objeto nuevo con el uid del usuario y la data del posteo todos campos del mismo objeto, sin encapsular
-        //chequear nullable, undefined
         const newPost = new Post({
             id_owner: userUid,
             title: payload.title,
@@ -281,13 +268,10 @@ class ProfileService {
             //3.Dentro del payload esta esta el Id del usuario que quiero eliminar de la lista de friends
             //4.Dentro de los datos que obtuve del usuario busco en la lista de friends un elemento
             //que coincida su element.id con el id del payload y lo quito de la lista
-            //console.log('lista de amigos previo al filter: '+JSON.stringify(userProfileDb.friend_list));
             const list_edited = userProfileDb.friend_list.filter(element => 
                 element._id != payload.id
             );
-            //console.log("lista editada: " + JSON.stringify(list_edited));
             userProfileDb.friend_list = list_edited;
-            //console.log("lista de amigos despues del filter: " + JSON.stringify(userProfileDb.friend_list));
             const result = await userProfileDb.save();//updateOne({post_list: userProfileDb.post_list});
             console.log("RESULT: " + result);    
             //que coincida su element.id con el id del payload y lo quito de la lista y actualizo el documento en mongo
@@ -318,13 +302,12 @@ class ProfileService {
             console.log('datos obtenidos de la db del usuario: '+userProfileDb);
             //3.Dentro del payload esta esta el Id del post del usuario que quiero eliminar de la lista de posts
             //4.Dentro de los datos que obtuve del usuario busco en la lista de posts un elemento
-            //let isValidPost = false;
             console.log('lista de posteos previo al filter: '+userProfileDb.post_list);
             const list_edited = userProfileDb.post_list.filter(element => 
                 element != payload.id
             );
             userProfileDb.post_list = list_edited;
-            const result = await userProfileDb.save();//updateOne({post_list: userProfileDb.post_list});
+            const result = await userProfileDb.save();
             console.log("RESULT: " + result);    
             //que coincida su element.id con el id del payload y lo quito de la lista y actualizo el documento en mongo
             userDataEdited = {
@@ -356,8 +339,6 @@ class ProfileService {
             const friendProfileDb = await User.findById(payload.id);
             console.log('datos obtenidos del amigo para agregar de la db: '+friendProfileDb);
             //5.Agrego un nuevo objeto a mi lista de amigos con esos datos del usuario que obtuve, pero solo id, nombre, apellido, y foto por el momento
-            //const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status, post_list } = userProfileDb;
-            //const { friend_list } = userProfileDb;
             const { _id, first_name, last_name, profile_photo } = friendProfileDb;
             const friend = {
                 _id,
@@ -367,7 +348,6 @@ class ProfileService {
             };
             console.log("datos del amigo: " + JSON.stringify(friend));
             console.log("friend list antes de agregar nuevo amigo: " + JSON.stringify(userProfileDb.friend_list));
-            //userProfileDb.friend_list = friend_list;
             userProfileDb.friend_list.push(friend);
             console.log("friend list despues de agregar nuevo amigo: " + JSON.stringify(userProfileDb.friend_list));
             const result = await userProfileDb.save();
