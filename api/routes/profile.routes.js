@@ -1,19 +1,23 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { getUserProfile, editUserProfile } = require('../controllers/profile.controller');
+const { getUserProfileController, editUserProfile, editUserPost, deleteUserFriend, deleteUserPost, postFollowUser, createUserPost } = require('../controllers/profile.controller');
 
 const router = Router();
 
 //add express-validator
-router.get('/user-profile', getUserProfile);
+router.get('/user-profile', getUserProfileController);
+
+router.post('/user-follow', postFollowUser);
 
 router.put('/edit-profile', editUserProfile);
 
-router.put('/edit-post'); // falta vamo con este
+router.post('/create-post', createUserPost);
 
-router.delete('/delete-friend'); // falta
+router.put('/edit-post', editUserPost);
 
-router.delete('/delete-post'); // falta
+router.delete('/delete-friend', deleteUserFriend);
+
+router.delete('/delete-post', deleteUserPost);
 
 
 module.exports = router;
