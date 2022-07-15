@@ -1,5 +1,5 @@
 const { response } = require("express");
-const ProfileService = require("../../services/profile.service");
+const profileService = require("../../services/profile.service");
 
 
 const getUserProfileController = async(req, res = response) => {
@@ -8,7 +8,7 @@ const getUserProfileController = async(req, res = response) => {
     const token = req.headers['auth-token'];
     console.log('token recibido desde el body controller: '+token);
     if(token != undefined) { //if the token comes in the request
-        const profileService = new ProfileService();
+        //const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         console.log('RESULTADO DESDE CONTROLLER: ' + JSON.stringify(uid));
         const userProfile = await profileService.getUserProfilByUid(uid);
@@ -39,7 +39,7 @@ const editUserProfile = async(req, res = response) => {
     const { payload } = req.body;
 
     if(token != undefined){
-        const profileService = new ProfileService();
+        //const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         const userProfileEdited = await profileService.editUserProfile(uid, payload);
         let response;
@@ -69,7 +69,7 @@ const createUserPost = async(req, res = response) => {
     const { payload } = req.body;
     console.log('token para crear post: ' + token);
     if(token != undefined){ //if the token comes in the request
-        const profileService = new ProfileService();
+        //const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         const userPostCreated = await profileService.createUserPostService(uid, payload);
         let response;
@@ -99,7 +99,7 @@ const editUserPost = async(req, res = response) => {
     const { payload } = req.body;
 
     if(token != undefined){ //if the token comes in the request
-        const profileService = new ProfileService();
+        const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         const userPostEdited = await profileService.editUserPost(uid, payload);
         let response;
@@ -129,7 +129,7 @@ const deleteUserFriend = async(req, res = response) => {
     const { payload } = req.body;
 
     if(token != undefined){ //if the token comes in the request
-        const profileService = new ProfileService();
+        //const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         const userEdited = await profileService.deleteUserFriend(uid, payload);
         let response;
@@ -159,7 +159,7 @@ const deleteUserPost = async(req, res = response) => {
     const { payload } = req.body;
 
     if(token != undefined){ //if the token comes in the request
-        const profileService = new ProfileService();
+        //const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         const userEdited = await profileService.deleteUserPost(uid, payload);
         let response;
@@ -190,7 +190,7 @@ const postFollowUser = async(req, res = response) => {
     const { payload } = req.body;
 
     if(token != undefined){ //if the token comes in the request
-        const profileService = new ProfileService();
+        //const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         const userFollowed = await profileService.postFollowUser(uid, payload);
         let response;
