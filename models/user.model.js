@@ -19,6 +19,9 @@ const UserSchema = Schema({
     provider: {
         type: String
     },
+    isPremium: {
+        type: Boolean
+    },
     profile_photo: {
         type: String,
     },
