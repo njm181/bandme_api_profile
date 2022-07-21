@@ -196,7 +196,7 @@ const deleteUserFriend = async(req, res = response) => {
         if(userEdited.was_deleted_friend){
             response = res.status(200).json({
                 was_edited: userEdited.was_deleted_friend,
-                user_post_edited: userEdited.user_data_edited,
+                user_data_edited: userEdited.user_data_edited,
                 message: 'Friend was deleted successfully'
             });
         }else{
@@ -241,7 +241,7 @@ const deleteUserPost = async(req, res = response) => {
         if(userEdited.was_deleted_post){
             response = res.status(200).json({
                 was_edited: userEdited.was_deleted_post,
-                user_post_edited: userEdited.user_data_edited,
+                user_data_edited: userEdited.user_data_edited,
                 message: 'Post was deleted successfully'
             });
         }else{
