@@ -339,12 +339,14 @@ class ProfileService {
             const friendProfileDb = await User.findById(payload.id);
             console.log('datos obtenidos del amigo para agregar de la db: '+friendProfileDb);
             //5.Agrego un nuevo objeto a mi lista de amigos con esos datos del usuario que obtuve, pero solo id, nombre, apellido, y foto por el momento
-            const { _id, first_name, last_name, profile_photo } = friendProfileDb;
+            const { _id, first_name, last_name, profile_photo, isPremium,  post_list} = friendProfileDb;
             const friend = {
                 _id,
                 first_name,
                 last_name,
-                profile_photo
+                profile_photo,
+                isPremium,
+                post_list
             };
             console.log("datos del amigo: " + JSON.stringify(friend));
             console.log("friend list antes de agregar nuevo amigo: " + JSON.stringify(userProfileDb.friend_list));
