@@ -30,7 +30,7 @@ class ProfileService {
         try{
             const userProfileDb = await User.findById(userUid);
             console.log('datos obtenidos de la db del usuario: '+userProfileDb);
-            const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status } = userProfileDb;
+            const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status, post_list, friend_list, isPremium } = userProfileDb;
             userProfile = {
                 exist: true,
                 user_data: {
@@ -41,7 +41,10 @@ class ProfileService {
                     social_media,
                     first_name,
                     last_name,
-                    account_status
+                    account_status,
+                    post_list,
+                    friend_list,
+                    isPremium
                 }
             };
         }catch(error){

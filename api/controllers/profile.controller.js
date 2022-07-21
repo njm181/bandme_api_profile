@@ -144,7 +144,6 @@ const editUserPost = async(req, res = response) => {
     const { payload } = req.body;
     if(token != undefined){ //if the token comes in the request
         try{
-        const profileService = new profileService();
         const {uid} = await profileService.decodeToken(token);
         if(uid != '' && uid != undefined && uid != null){
         const userPostEdited = await profileService.editUserPost(uid, payload);
