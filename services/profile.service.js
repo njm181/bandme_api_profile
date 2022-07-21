@@ -30,7 +30,7 @@ class ProfileService {
         try{
             const userProfileDb = await User.findById(userUid);
             console.log('datos obtenidos de la db del usuario: '+userProfileDb);
-            const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status } = userProfileDb;
+            const { email, user_type, description, profile_photo, social_media, first_name, last_name, account_status, post_list, friend_list, isPremium } = userProfileDb;
             userProfile = {
                 exist: true,
                 user_data: {
@@ -41,7 +41,10 @@ class ProfileService {
                     social_media,
                     first_name,
                     last_name,
-                    account_status
+                    account_status,
+                    post_list,
+                    friend_list,
+                    isPremium
                 }
             };
         }catch(error){
@@ -339,12 +342,14 @@ class ProfileService {
             const friendProfileDb = await User.findById(payload.id);
             console.log('datos obtenidos del amigo para agregar de la db: '+friendProfileDb);
             //5.Agrego un nuevo objeto a mi lista de amigos con esos datos del usuario que obtuve, pero solo id, nombre, apellido, y foto por el momento
-            const { _id, first_name, last_name, profile_photo } = friendProfileDb;
+            const { _id, first_name, last_name, profile_photo, isPremium,  post_list} = friendProfileDb;
             const friend = {
                 _id,
                 first_name,
                 last_name,
-                profile_photo
+                profile_photo,
+                isPremium,
+                post_list
             };
             console.log("datos del amigo: " + JSON.stringify(friend));
             console.log("friend list antes de agregar nuevo amigo: " + JSON.stringify(userProfileDb.friend_list));
@@ -366,4 +371,4 @@ class ProfileService {
     }
 }
 
-module.exports = ProfileService;
+module.exports = new ProfileService();
